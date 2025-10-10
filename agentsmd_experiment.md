@@ -1,25 +1,27 @@
 # Experimenting with AGENTS.md
 
-The goal of this experiment is to try to ascertain what impact (if any) the presence of an AGENTS.md or copilot-instructions.md file has when coding with a Github Copilot.
+The goal of this experiment is to try to ascertain what impact (if any) the presence of an `AGENTS.md` or `copilot-instructions.md` file has when coding with Github Copilot in VS Code.
 
 ## Method
-- AI Agent tested: Copilot in VS Code (Version: 1.104.1 (Universal)
+- AI Agent tested: Copilot in VS Code (version details in Appendix 2)
 - LLM: GPT-5 mini
 - Mode: Agent
 
-The agent was given the same prompt with the same context in the following scenarios:
+The agent was given the same base prompt with the same base context in the following scenarios:
   1. without instructions file
   2. with instructions file in the repo, but not in context
   3. with instructions file in the repo and in context
   4. with instructions file in the repo and in context and referenced by the user
 
-The results were logged in a separate file, outside of the repo, which the agent did not have access to. In each interaction, there was no further response from the user.
+This was repeated with both `AGENTS.md` file, located in workspace root (Scenarios `1.#`) and `copliot-instructions.md` file, located in .github/instructions (Scenarios `2.#`).
 
-After the results were logged, the chats were reset back to the beginning of the conversation (before the first prompt) before proceeding with the next scenario. (see NOTE)
+The results were logged in a separate file outside of the repo, which the agent did not have access to. In each interaction, there was no further response from the user.
 
-This was repeated with both `AGENTS.md` file (in workspace root) and `copliot-instructions.md` file (in .github/instructions)
+After the results were logged, the chats were reset back to the beginning of the conversation (prior to the first prompt) before proceeding with the next scenario. (see NOTE)
 
-NOTE: It was identified mid experiment that `Restore checkpoint` does not clear the chat history. The agent clearly had memory of conversations that occurred even after selecting `Restore checkpoint`. Beginning with the copilot-instructions.md session, `Clear All Workspace Chats` was run between each scenario, rather than `Restore checkpoint`. This is clearly specified in each phase which reset method was used.
+NOTE: It was identified mid-experiment that `Restore checkpoint` does not fully clear the chat history (see Results `1.5`). The agent clearly had memory of conversations that occurred even after selecting `Restore checkpoint`. Beginning with the first `copilot-instructions.md` scenario `2.1`, `Clear All Workspace Chats` was run between each scenario, rather than `Restore checkpoint`. `Clear All Workspace Chats` seems to have been effective in "erasing" the agent's memory of earlier conversions, based on the results of scenario `2.1` This is clearly specified in each phase which reset method was used.
+
+The results have been logged in the order in which they were conducted.
 
 ## Results
 
@@ -203,54 +205,7 @@ def test_assert_frame_equal_nested_df_na_yass():
     print("passed")
 ```
 
-### 1.5 copilot-instructions.md (no AGENTS.md) in context
-Reset method: Restore checkpoint <br>
-Context: test_assert_frame_equal.py & copilot-instructions.md
-
-Prompt:
-```
-I would like you to add a new unit test which tests that 2 dataframes whose contents are nested dataframes, with a single pd.NA value are considered equal.
-```
-
-Copilot Response:
-```
-I'll (1) add a short todo plan and mark the test creation as in-progress, (2) open the existing test file to see where to add the new test, (3) apply a patch that inserts the new unit test, and (4) run pytest for that single test to verify it. I'll start by writing the todo list and then read the target test file.
-
-Starting (1/3) Add nested DataFrame pd.NA test
-
-Now I'll read the existing test file to find a good insertion point for the new test.
-
-Read test_assert_frame_equal.py
-
-I'm going to (1) add the new test function into test_assert_frame_equal.py and update the todo list status, then (2) run pytest for just that test to verify whether it passes. Expected outcome: test added and pytest output showing pass or failure. I'll apply the patch now.
-
-test_assert_frame_equal.py+13-0
-I'll mark the first todo as completed and set the next todo (run test) to in-progress, then run pytest for the new test only. I'll run pytest for that test file and filter to the new test.
-
-Starting (2/3) Run the new test
-
-I'll run pytest for the single test to verify it passes.
-
- Run zsh command?
-pytest -q pandas/tests/util/test_assert_frame_equal.py::test_nested_dataframe_with_pdNA_yass -q
-```
-
-Copilot Code Generated:
-``` python
-def test_nested_dataframe_with_pdNA_yass():
-    # Ensure DataFrames that contain nested DataFrame objects with pd.NA
-    # are considered equal by tm.assert_frame_equal
-    inner1 = DataFrame({"a": [pd.NA]})
-    inner2 = DataFrame({"a": [pd.NA]})
-
-    df1 = DataFrame({"nested": [inner1]})
-    df2 = DataFrame({"nested": [inner2]})
-
-    tm.assert_frame_equal(df1, df2)
-    print("passed")
-```
-
-### 1.6 Back to Baseline: No AGENTS.md or copilot-instructions.md (testing how effective the Restore Checkpoint is)
+### 1.5 Back to Baseline: No AGENTS.md or copilot-instructions.md (testing how effective the Restore Checkpoint is)
 Reset method: Restore checkpoint <br>
 Context: test_assert_frame_equal.py
 
@@ -489,16 +444,16 @@ def test_nested_dataframe_with_pd_na_yass():
 
 We found that neither instructions file  (`AGENTS.md`  or `copilot-instructions.md`) had any impact on Copilot's behavior until the user prompted Copilot to refer to the file at some point during the session (see Results `1.2` `1.3` `2.2` `2.3`). This was observed regardless of whether they were in context or not, and even when placed in the specified location, with the corresponding VS Code settings Enabled.
 
-Once prompted during the session, we found both `AGENTS.md` and `copilot-instructions.md` to be equally effective in impacting the agents behavior. It followed the specific instructions in the `Testing Guidelines` section, specifically that all new test functions should end with `_yass`, that tests should not have docstrings, and that tests must include a print statement which prints 'passed'. (Results `1.4`, `2.4`) Once the user has prompted the agent to look at this file once, the agent continues to adhere to the guidelines in the instruction file for the remainder of the conversation, even if not provided in context again or referenced, and even if the file is deleted (Results `1.6`). This was observed even when "Restore Checkpoint" reset the conversation to before the file was ever mentioned in the first place. (Results `1.6`)
+Once prompted during the session, we found both `AGENTS.md` and `copilot-instructions.md` to be equally effective in impacting the agents behavior. It followed the specific instructions in the `Testing Guidelines` section, specifically that all new test functions should end with `_yass`, that tests should not have docstrings, and that tests must include a print statement which prints 'passed'. (Results `1.4`, `2.4`) Once the user has prompted the agent to look at this file once, the agent continues to adhere to the guidelines in the instruction file for the remainder of the conversation, even if not provided in context again or referenced, and even if the file is deleted (Results `1.5`). This was observed even when "Restore Checkpoint" reset the conversation to before the file was ever mentioned in the first place. (Results `1.5`)
 
 Even in the scenarios where the agent was adhering to the guidelines in the `Testing Guidelines` section of the respective instructions files, the agent never prompted the user to share as context any of the `*.rst` files specified in the earlier section `Files to Open First`. This is an indication that such instructions are not useful, at least not as written.
 
-An incidental finding was that "Restore Checkpoint" does not clear the chat agent's memory to that point. It was very clear from the results of `1.6` that even after the AGENTS.md was removed from the repo altogether that the agent was still adhering to those guidelines. `Clear All Workspace Chats` effectively erased the agents knowledge of this file, as was obesrved in results of `2.1`.
+An incidental finding was that "Restore Checkpoint" does not clear the chat agent's memory to that point. It was very clear from the results of `1.5` that even after the AGENTS.md was removed from the repo altogether that the agent was still adhering to those guidelines. `Clear All Workspace Chats` effectively erased the agents knowledge of this file, as was obesrved in results of `2.1`.
 
 ### Future investigation
 Some ideas for future investigation could include experimenting with different LLM models, different versions and settings in VS code, or different types of instructions within the instructions file. Perhaps including an instruction in the Testing Guidelines section of the instructions file instructing the agent to prompt the user to grant them access to the `*.rst` files could be effective. Does the agent re-read the file, or merely recall the content of the file at the time when it is prompted. i.e. if the file is updated mid-session, does the agent adhere to the updated guidance, and does it matter if the file is referred to again by the human or not?
 
-# APPENDIX: The AGENTS.md & copilot-instructions.md file
+# Appendix 1: The AGENTS.md & copilot-instructions.md file
 
 ## pandas Agent Instructions
 
@@ -540,15 +495,15 @@ If you can't load any of these files, prompt the user to grant you access to the
 - all newly added tests must have a print statement which prints 'passed' if the test passes
 
 # Appendix 2: My VSCODE Setup
-Version: 1.104.1 (Universal)
-Commit: 0f0d87fa9e96c856c5212fc86db137ac0d783365
-Date: 2025-09-17T23:36:24.973Z (3 wks ago)
-Electron: 37.3.1
-ElectronBuildId: 12404162
-Chromium: 138.0.7204.235
-Node.js: 22.18.0
-V8: 13.8.258.31-electron.0
-OS: Darwin arm64 24.3.0
+Version: 1.104.1 (Universal)<br>
+Commit: 0f0d87fa9e96c856c5212fc86db137ac0d783365<br>
+Date: 2025-09-17T23:36:24.973Z (3 wks ago)<br>
+Electron: 37.3.1<br>
+ElectronBuildId: 12404162<br>
+Chromium: 138.0.7204.235<br>
+Node.js: 22.18.0<br>
+V8: 13.8.258.31-electron.0<br>
+OS: Darwin arm64 24.3.0<br>
 
 ### Relevant VS Code Settings Enabled:
 - [x] Instructions Files Locations *Experimental*
